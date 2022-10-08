@@ -34,6 +34,9 @@ public class Graph {
 
         return stringBuilder.toString();
     }
+    public int[][] getAdjacencyMatrix(){
+        return adjacencyMatrix;
+    }
 
 }
 
