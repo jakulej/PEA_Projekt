@@ -5,6 +5,10 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Graph {
+    public int getNodeCount() {
+        return nodeCount;
+    }
+
     int nodeCount;
     int edgeCount;
     int[][] adjacencyMatrix;
