@@ -1,7 +1,7 @@
 package kulej.algorithms;
 
 import kulej.mainpackage.Graph;
-import org.jetbrains.annotations.NotNull;
+//import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -10,7 +10,7 @@ public class BruteForce {
     int nodeCount;
     int[][] graph;
 
-    private class Path {
+    public class Path {
         LinkedList<Integer> nodeLeft;
         LinkedHashSet<Integer> currentPath;
 
@@ -45,8 +45,12 @@ public class BruteForce {
         @SuppressWarnings("OptionalGetWithoutIsPresent")
         public int getStartingNode(){
             return currentPath.stream().findFirst().get();
+        }public LinkedHashSet<Integer> getCurrentPath() {
+            return currentPath;
         }
-
+        public int getCCost() {
+            return currentCost;
+        }
     }
 
 
@@ -56,7 +60,9 @@ public class BruteForce {
         this.graph = graph.getAdjacencyMatrix();
     }
 
-    public Path g(int node, @NotNull Path path) {
+    public Path g(int node,Path path) {
+
+
         if(path.nodeLeft.isEmpty()) {
             path.addCurrentCost(graph[node][path.getStartingNode()]);
             return path;
@@ -77,8 +83,9 @@ public class BruteForce {
         return cost[lowestCostIndex];
 
     }
-    public int[] getSolution(){
-        return g(0,new Path(0)).currentPath.stream().mapToInt(i->i).toArray();
+    public Path getSolution(){
+        //return g(0,new Path(0)).currentPath.stream().mapToInt(i->i).toArray();
+        return g(0,new Path(0));
     }
 
 }

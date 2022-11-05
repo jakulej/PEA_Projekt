@@ -3,6 +3,7 @@ package kulej.mainpackage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.util.Random;
 
 public class Graph {
     public int getNodeCount() {
@@ -24,6 +25,20 @@ public class Graph {
             }
         }
 
+    }
+    public Graph(int size){
+        Random random = new Random();
+        this.nodeCount = size;
+        this.adjacencyMatrix = new int[this.nodeCount][this.nodeCount];
+
+        for(int i = 0; i < this.nodeCount; ++i) {
+            for(int j = 0; j < this.nodeCount; ++j) {
+                if(i==j)
+                    this.adjacencyMatrix[i][j] = -1;
+                else
+                    this.adjacencyMatrix[i][j] = random.nextInt(101);
+            }
+        }
     }
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
