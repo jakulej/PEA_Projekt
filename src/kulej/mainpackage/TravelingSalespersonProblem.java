@@ -1,5 +1,6 @@
 package kulej.mainpackage;
 
+import kulej.algorithms.BandB;
 import kulej.algorithms.BruteForce;
 
 import java.io.File;
@@ -42,16 +43,19 @@ public class TravelingSalespersonProblem {
                             System.out.println("Nie wczytano/wylosowano żadnych danych");
                         break;
                     case 4:
-                        BruteForce bruteForce = new BruteForce(cities);
+                        BandB bandb = new BandB(cities);
+                        Path path = bandb.resolve();
+                        int[] soultion = path.getCurrentPath().stream().mapToInt(i -> i).toArray();
+                        /*BruteForce bruteForce = new BruteForce(cities);
                         BruteForce.Path path = bruteForce.getSolution();
                         int[] soultion = path.getCurrentPath().stream().mapToInt(i -> i).toArray();
-
+                           */
                         System.out.println("Najkrotsza sciezka: ");
                         for (int i = 0; i < soultion.length; i++) {
                             System.out.print(soultion[i] + " -> ");
                         }
                         System.out.println(soultion[0]);
-                        System.out.println("Koszt: " + path.getCCost());
+                        //System.out.println("Koszt: " + path.getCCost());*/
                         break;
                 }
             } catch (FileNotFoundException | InputMismatchException e) {

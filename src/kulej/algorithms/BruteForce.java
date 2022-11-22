@@ -1,6 +1,7 @@
 package kulej.algorithms;
 
 import kulej.mainpackage.Graph;
+import kulej.mainpackage.Path;
 //import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -10,9 +11,8 @@ public class BruteForce {
     int nodeCount;
     int[][] graph;
 
-    public class Path {
-        LinkedList<Integer> nodeLeft;
-        LinkedHashSet<Integer> currentPath;
+    public class Path extends kulej.mainpackage.Path {
+
 
         public int getCurrentCost() {
             return currentCost;
