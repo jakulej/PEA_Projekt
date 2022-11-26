@@ -2,8 +2,8 @@ package kulej.algorithms;
 
 import kulej.mainpackage.Graph;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.stream.IntStream;
@@ -13,16 +13,21 @@ public class BandB {
     int[][] graph;
     int minimaliziedAmount;
     LinkedList<PathElement> checkedPaths = new LinkedList<PathElement>();
+    LinkedList<PathElement> temp = new LinkedList<PathElement>();
     public class PathElement extends kulej.mainpackage.Path{
         boolean isChecked = false;
         int[][] graphPath;
         int reduceCost;
         int currentNode;
 
+
+
         PathElement(int[][] graphPath, int reduceCost){
             currentNode = 0;
             this.graphPath = new int[nodeCount][nodeCount];
-            System.arraycopy(this.graphPath, 0, graphPath, 0, nodeCount);
+            for (int i = 0; i < nodeCount; i++) {
+                this.graphPath[i] = Arrays.copyOf(graphPath[i],nodeCount);
+            }
             this.reduceCost = reduceCost;
             this.currentPath = new LinkedHashSet<Integer>();
             this.nodeLeft = new LinkedList<Integer>();
@@ -36,26 +41,23 @@ public class BandB {
             this.currentPath.add(0);
 
         }
-        PathElement(int[][] graphPath, int reduceCost, int start, int destination){
+        PathElement(int[][] graphPath, int reduceCost, int start, int destination, PathElement pathElement){
             currentNode = destination;
-            this.graphPath = Arrays.copyOf(graphPath,graphPath.length);
+            this.graphPath = new int[nodeCount][nodeCount];
+            for (int i = 0; i < nodeCount; i++) {
+                this.graphPath[i] = Arrays.copyOf(graphPath[i],nodeCount);
+            }
             this.reduceCost = reduceCost;
-            this.currentPath = new LinkedHashSet<Integer>();
-            this.nodeLeft = new LinkedList<Integer>();
+            this.currentPath = new LinkedHashSet<Integer>(pathElement.currentPath);
+            this.nodeLeft = new LinkedList<Integer>(pathElement.nodeLeft);
             this.nodeLeft.remove((Object)destination);
             this.currentPath.add(destination);
-            fillInf(start,destination);
+            fillInf(start,destination, this.graphPath);
             minimalizeGraph(this);
-            this.reduceCost += graphPath[start][destination];
+            this.reduceCost += graph[start][destination];
 
         }
-        private void fillInf( int start, int destination){
-            for (int i = 0; i < nodeCount; i++) {
-                this.graphPath[start][i] = Integer.MAX_VALUE;
-                this.graphPath[i][destination] = Integer.MAX_VALUE;
-            }
-           this.graphPath[destination][start] = Integer.MAX_VALUE;
-        }
+
     }
 
 
@@ -73,18 +75,23 @@ public class BandB {
         int lowerCost;
         checkedPaths.add(new PathElement(graph,0));
         minimalizeGraph(checkedPaths.get(0));
-        this.graph = checkedPaths.get(0).graphPath;
+        this.graph = checkedPaths.get(0).graphPath.clone();
+
         findMin(checkedPaths.getFirst());
 
         bestPath = checkedPaths.getLast();
         lowerCost = bestPath.reduceCost;
 
-        for (PathElement path: checkedPaths) {
+        for (Iterator<PathElement> iterator  = checkedPaths.iterator(); iterator.hasNext();) {
+            PathElement path = iterator.next();
             if(!path.isChecked)
                 checkPath(path,lowerCost);
         }
+        for(PathElement path: temp){
+            checkedPaths.add(path);
+        }
 
-        for (PathElement path: checkedPaths) {
+        for (PathElement path: temp) {
             if(path.nodeLeft.size()==0 && path.reduceCost<bestPath.reduceCost)
                 bestPath = path;
         }
@@ -95,11 +102,18 @@ public class BandB {
         int size = pathElement.nodeLeft.size();
         pathElement.isChecked = true;
         for (int i = 0; i < size; i++) {
-            checkedPaths.add(new PathElement(graph, pathElement.reduceCost, 0, pathElement.nodeLeft.get(i)));
-            if(checkedPaths.getLast().reduceCost<lowerCost && size>0){
+            temp.add(new PathElement(graph, pathElement.reduceCost, 0, pathElement.nodeLeft.get(i), pathElement));
+            if(temp.getLast().reduceCost<lowerCost && size>0){
                 checkPath(checkedPaths.getLast(), lowerCost);
             }
         }
+    }
+    private void fillInf(int start, int destination, int[][]graphToFill){
+        for (int i = 0; i < nodeCount; i++) {
+            graphToFill[start][i] = Integer.MAX_VALUE;
+            graphToFill[i][destination] = Integer.MAX_VALUE;
+        }
+        graphToFill[destination][start] = Integer.MAX_VALUE;
     }
     private void findMin(PathElement pathElement){
         int size = pathElement.nodeLeft.size();
@@ -107,7 +121,7 @@ public class BandB {
             int[] cost = new int[size];
             int smallestCostIndex = 0;
             for (int i = 0; i < size; i++) {
-                checkedPaths.add(new PathElement(graph, pathElement.reduceCost, 0, pathElement.nodeLeft.get(i)));
+                checkedPaths.add(new PathElement(pathElement.graphPath, pathElement.reduceCost, 0, pathElement.nodeLeft.get(i), pathElement));
                 cost[i] = checkedPaths.getLast().reduceCost;
             }
 
@@ -183,6 +197,14 @@ public class BandB {
                 pathElement.graphPath[j][i] -= minInColumn[i];
             }
         }
+    }
+    public static int getCost(int[][] graph, int[] path){
+        int cost = 0;
+        for (int i = 1; i < graph.length; i++) {
+            cost+= graph[path[i-1]][path[i]];
+        }
+        cost += graph[path[graph.length-1]][path[0]];
+        return cost;
     }
 
 

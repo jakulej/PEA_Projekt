@@ -61,6 +61,7 @@ public class BruteForce {
     }
 
     public Path g(int node,Path path) {
+
         if(path.nodeLeft.isEmpty()) {
             path.addCurrentCost(graph[node][path.getStartingNode()]);
             return path;

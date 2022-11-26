@@ -55,7 +55,36 @@ public class TravelingSalespersonProblem {
                             System.out.print(soultion[i] + " -> ");
                         }
                         System.out.println(soultion[0]);
-                        //System.out.println("Koszt: " + path.getCCost());*/
+                        System.out.println("Koszt: " + BandB.getCost(cities.getAdjacencyMatrix(),soultion));
+                        break;
+                    case 6:
+                        Graph random;
+                        int size = 10;
+                        long start = 0,stop,sumBF = 0, sumBnB = 0;
+                        for (int i = 0; i < 150; i++) {
+                            random = new Graph(size);
+                            if(i>49)
+                                start = System.nanoTime();
+                            BruteForce bruteForce = new BruteForce(random);
+                            Path pathBF = bruteForce.getSolution();
+                            stop = System.nanoTime();
+                            if(i>49)
+                                sumBF += stop - start;
+                        }
+                        System.out.println("SumBF "+sumBF);
+
+                        for (int i = 0; i < 150; i++) {
+                            random = new Graph(size);
+                            if(i>49)
+                                start = System.nanoTime();
+                            BruteForce bruteForce = new BruteForce(random);
+                            Path pathBF = bruteForce.getSolution();
+                            stop = System.nanoTime();
+                            if(i>49)
+                                sumBnB += stop - start;
+                        }
+                        System.out.println("SumBn "+sumBnB);
+
                         break;
                 }
             } catch (FileNotFoundException | InputMismatchException e) {
