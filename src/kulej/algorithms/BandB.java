@@ -8,10 +8,7 @@ import java.util.stream.IntStream;
 public class BandB {
     int nodeCount;
     int[][] graph;
-    int minimaliziedAmount;
     PriorityQueue<PathElement> queue = new PriorityQueue<PathElement>();
-    LinkedList<PathElement> checkedPaths = new LinkedList<PathElement>();
-    LinkedList<PathElement> temp = new LinkedList<PathElement>();
     public class PathElement extends kulej.mainpackage.Path implements Comparable<PathElement>{
         boolean isChecked = false;
         int[][] graphPath;
@@ -73,6 +70,7 @@ public class BandB {
 
 
     public PathElement resolve(){
+        long time = System.nanoTime();
         PathElement pathElement = new PathElement(graph,0);
         minimalizeGraph(pathElement);
         for (int i = 0; i < nodeCount; i++) {
@@ -84,6 +82,9 @@ public class BandB {
                queue.add(new PathElement(pathElement.graphPath, pathElement.reduceCost, pathElement.currentNode,node, pathElement));
            }
            pathElement = queue.poll();
+           if(time - System.nanoTime()> 120000000000L){
+                return null;
+           }
        }while(pathElement.nodeLeft.size()>0);
 
 

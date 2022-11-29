@@ -58,32 +58,13 @@ public class TravelingSalespersonProblem {
                         System.out.println("Koszt: " + BandB.getCost(cities.getAdjacencyMatrix(),soultion));
                         break;
                     case 6:
-                        Graph random;
-                        int size = 10;
-                        long start = 0,stop,sumBF = 0, sumBnB = 0;
-                        for (int i = 0; i < 150; i++) {
-                            random = new Graph(size);
-                            if(i>49)
-                                start = System.nanoTime();
-                            BruteForce bruteForce = new BruteForce(random);
-                            Path pathBF = bruteForce.getSolution();
-                            stop = System.nanoTime();
-                            if(i>49)
-                                sumBF += stop - start;
-                        }
-                        System.out.println("SumBF "+sumBF);
+                        //testSingleBnB(13);
 
-                        for (int i = 0; i < 150; i++) {
-                            random = new Graph(size);
-                            if(i>49)
-                                start = System.nanoTime();
-                            BruteForce bruteForce = new BruteForce(random);
-                            Path pathBF = bruteForce.getSolution();
-                            stop = System.nanoTime();
-                            if(i>49)
-                                sumBnB += stop - start;
+                        for (int i = 5; i < 12; i++) {
+                            testBF(i);
+                            testBnB(i);
                         }
-                        System.out.println("SumBn "+sumBnB);
+                        testBnB(12);
 
                         break;
                 }
@@ -96,6 +77,55 @@ public class TravelingSalespersonProblem {
             }
             System.out.println("\n\n");
         } while (choise != 5);
+    }
+
+    private static void testBF(int node){
+        Graph random;
+        long start = 0,stop,sumBF = 0;
+        for (int i = 0; i < 150; i++) {
+            random = new Graph(node);
+            if(i>49)
+                start = System.nanoTime();
+            BruteForce bruteForce = new BruteForce(random);
+            Path pathBF = bruteForce.getSolution();
+            stop = System.nanoTime();
+            if(i>49)
+                sumBF += stop - start;
+        }
+        System.out.println(node+" AvargeBF "+sumBF/100);
+    }
+    private static void testBnB(int node){
+        Graph random;
+        int correct = 100;
+        long start = 0,stop,sumBnB = 0;
+        for (int i = 0; i < 150; i++) {
+            random = new Graph(node);
+            if(i>49)
+                start = System.nanoTime();
+            BruteForce bruteForce = new BruteForce(random);
+            Path pathBF = bruteForce.getSolution();
+            stop = System.nanoTime();
+            if(pathBF==null){
+                correct--;
+                start =0;
+                stop = 0;
+            }
+            if(i>49)
+                sumBnB += stop - start;
+        }
+        System.out.println(node + " AvargeBnB: "+sumBnB/correct + " Correct: " + correct);
+    }
+    private static void testSingleBnB(int node){
+        Graph random;
+        long start = 0,stop,sumBnB = 0;
+            random = new Graph(node);
+            start = System.nanoTime();
+            BruteForce bruteForce = new BruteForce(random);
+            Path pathBF = bruteForce.getSolution();
+            stop = System.nanoTime();
+            sumBnB += stop - start;
+
+        System.out.println("Avarge: "+sumBnB);
     }
 
 }
