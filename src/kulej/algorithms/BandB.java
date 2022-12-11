@@ -82,9 +82,6 @@ public class BandB {
                queue.add(new PathElement(pathElement.graphPath, pathElement.reduceCost, pathElement.currentNode,node, pathElement));
            }
            pathElement = queue.poll();
-           if(time - System.nanoTime()> 120000000000L){
-                return null;
-           }
        }while(pathElement.nodeLeft.size()>0);
 
 

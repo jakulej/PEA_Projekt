@@ -1,5 +1,6 @@
 package kulej.mainpackage;
 
+import kulej.algorithms.Annealing;
 import kulej.algorithms.BandB;
 import kulej.algorithms.BruteForce;
 
@@ -43,19 +44,11 @@ public class TravelingSalespersonProblem {
                             System.out.println("Nie wczytano/wylosowano żadnych danych");
                         break;
                     case 4:
-                        BandB bandb = new BandB(cities);
-                        Path path = bandb.resolve();
-                        int[] soultion = path.getCurrentPath().stream().mapToInt(i -> i).toArray();
-                        /*BruteForce bruteForce = new BruteForce(cities);
-                        BruteForce.Path path = bruteForce.getSolution();
-                        int[] soultion = path.getCurrentPath().stream().mapToInt(i -> i).toArray();
-                           */
-                        System.out.println("Najkrotsza sciezka: ");
-                        for (int i = 0; i < soultion.length; i++) {
-                            System.out.print(soultion[i] + " -> ");
+                        Annealing annealing = new Annealing(10,0.8,10000000000L,10,cities.getAdjacencyMatrix(),cities.nodeCount);
+                        int[] solution = annealing.resolve();
+                        for (int i = 0; i < cities.nodeCount; i++) {
+                            System.out.print(solution[i]+" -> ");
                         }
-                        System.out.println(soultion[0]);
-                        System.out.println("Koszt: " + BandB.getCost(cities.getAdjacencyMatrix(),soultion));
                         break;
                     case 6:
                         //testSingleBnB(13);
