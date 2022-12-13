@@ -16,9 +16,18 @@ public class Graph {
 
     public Graph(String filename) throws FileNotFoundException {
         Scanner read = new Scanner(new File(filename));
+        for (int i = 0; i < 3; i++) {
+            if(read.hasNext())
+                read.nextLine();
+        }
+        if(read.hasNext())
+            read.next();
         this.nodeCount = read.nextInt();
         this.adjacencyMatrix = new int[this.nodeCount][this.nodeCount];
-
+        for (int i = 0; i < 4; i++) {
+            if(read.hasNext())
+                read.nextLine();
+        }
         for(int i = 0; i < this.nodeCount; ++i) {
             for(int j = 0; j < this.nodeCount; ++j) {
                 this.adjacencyMatrix[i][j] = read.nextInt();

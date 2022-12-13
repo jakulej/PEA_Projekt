@@ -30,6 +30,7 @@ public class Annealing {
 
         actualTime = System.nanoTime();
         while (time>System.nanoTime()-actualTime) {
+
             for (int i = 0; i < period; i++) {
                 nextPath = randomNextPath(currentPath);
                 if (doSwap(currentPath, nextPath))
@@ -55,7 +56,7 @@ public class Annealing {
 
         return newPath;
     }
-    private int getPathCost(int[] path){
+    public int getPathCost(int[] path){
         int cost = 0;
         for (int i = 1; i < nodeCount; i++) {
             cost += graph[path[i-1]][path[i]];
@@ -74,9 +75,9 @@ public class Annealing {
 
         currentPathCost = getPathCost(currentPath);
         nextPathCost = getPathCost(nextPath);
-
         if(nextPathCost<currentPathCost)
             return true;
+
         double prob = calculateProbability(currentPathCost,nextPathCost);
         double rand =random.nextDouble();
         if(rand>prob)

@@ -30,7 +30,8 @@ public class TravelingSalespersonProblem {
                 switch (choise) {
                     case 1:
                         System.out.println("Podaj nazwe pliku wraz z formatem");
-                        cities = new Graph(keyboard.nextLine());
+                        String nazwa = keyboard.nextLine();
+                        cities = new Graph(nazwa);
                         break;
                     case 2:
                         System.out.println("Podaj liczbe wierzchołków");
@@ -44,11 +45,13 @@ public class TravelingSalespersonProblem {
                             System.out.println("Nie wczytano/wylosowano żadnych danych");
                         break;
                     case 4:
-                        Annealing annealing = new Annealing(10,0.8,10000000000L,10,cities.getAdjacencyMatrix(),cities.nodeCount);
+                        Annealing annealing = new Annealing(10000,0.99,1000000000L,10,cities.getAdjacencyMatrix(),cities.nodeCount);
                         int[] solution = annealing.resolve();
                         for (int i = 0; i < cities.nodeCount; i++) {
                             System.out.print(solution[i]+" -> ");
                         }
+                        System.out.println("");
+                        System.out.println("Koszt: "+ annealing.getPathCost(solution));
                         break;
                     case 6:
                         //testSingleBnB(13);
