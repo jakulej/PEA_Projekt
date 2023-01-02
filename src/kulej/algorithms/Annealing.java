@@ -13,32 +13,45 @@ public class Annealing {
     int period;
     int nodeCount;
     int[][] graph;
+    int[] bestPath;
+    int bestPathCost;
 
-    public Annealing(int temperature, double cooler, long time,int period, int[][] graph, int nodeCount) {
-        this.temperature = temperature;
+    public Annealing(double cooler, long time,int[][] graph, int nodeCount) {
         this.cooler = cooler;
         this.time = time;
-        this.period = period;
         this.graph = graph;
         this.nodeCount = nodeCount;
+        this.period = this.nodeCount * 20;
     }
 
     public int[] resolve(){
-        long actualTime;
+        int timeIterator = 0;
+        long startTime;
         int[] currentPath = Greedy.resolve(graph,nodeCount).currentPath.stream().mapToInt(i->i).toArray();
+        this.bestPath = currentPath;
+        this.bestPathCost = getPathCost(this.bestPath);
+        this.temperature = this.nodeCount * 100000000;
         int[] nextPath;
 
-        actualTime = System.nanoTime();
-        while (time>System.nanoTime()-actualTime) {
+        startTime = System.nanoTime();
+        while (time>System.nanoTime()-startTime) {
 
             for (int i = 0; i < period; i++) {
                 nextPath = randomNextPath(currentPath);
+                if(getPathCost(nextPath)<bestPathCost)
+                    bestPath = nextPath;
+                    bestPathCost = getPathCost(bestPath);
                 if (doSwap(currentPath, nextPath))
                     currentPath = nextPath;
+                if(System.nanoTime()-startTime>(10000000000L * timeIterator)){
+                    System.out.println("wynik dla " +timeIterator+"0 sek = " + bestPathCost);
+                    timeIterator++;
+                }
             }
             actualizeTemp();
         }
-        return currentPath;
+        System.out.println("Temperatura koncowa: "+this.temperature);
+        return bestPath;
     }
     private int[] randomNextPath(int[] path){
         Random random = new Random();
@@ -64,7 +77,7 @@ public class Annealing {
         return cost;
     }
     private double calculateProbability(int currentPathCost, int worstPathCost){
-        return Math.exp((currentPathCost-worstPathCost)/temperature);
+        return Math.exp((currentPathCost-worstPathCost)/this.temperature);
     }
     private void actualizeTemp(){
         temperature = temperature * cooler;
@@ -75,9 +88,9 @@ public class Annealing {
 
         currentPathCost = getPathCost(currentPath);
         nextPathCost = getPathCost(nextPath);
-        if(nextPathCost<currentPathCost)
+        if(nextPathCost<currentPathCost){
             return true;
-
+        }
         double prob = calculateProbability(currentPathCost,nextPathCost);
         double rand =random.nextDouble();
         if(rand>prob)

@@ -3,6 +3,7 @@ package kulej.mainpackage;
 import kulej.algorithms.Annealing;
 import kulej.algorithms.BandB;
 import kulej.algorithms.BruteForce;
+import kulej.algorithms.Genetic;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,11 +22,18 @@ public class TravelingSalespersonProblem {
                 System.out.println("2.Wygenerowanie danych losowych.");
                 System.out.println("3.Wyświetlenie ostatnio wczytanych lub wygenerowanych danych.");
                 System.out.println("4.Uruchomienie danego algorytmu dla ostatnio wczytanych lub wygenerowanych danych i wyświetlenie wyników.");
-                System.out.println("5. Zakończ program.");
+                System.out.println("5. Wybierz dane");
                 Scanner keyboard = new Scanner(System.in);
                 choise = keyboard.nextInt();
                 keyboard.nextLine();
                 System.out.println(choise);
+                long seconds = 160L;
+                long time = seconds * 1000000000L;
+                int temperature = 2293000;
+                double cooler = 0.9;
+                int period = 50;
+                int population = 10;
+
 
                 switch (choise) {
                     case 1:
@@ -45,14 +53,16 @@ public class TravelingSalespersonProblem {
                             System.out.println("Nie wczytano/wylosowano żadnych danych");
                         break;
                     case 4:
-                        Annealing annealing = new Annealing(10000,0.99,1000000000L,10,cities.getAdjacencyMatrix(),cities.nodeCount);
-                        int[] solution = annealing.resolve();
-                        for (int i = 0; i < cities.nodeCount; i++) {
-                            System.out.print(solution[i]+" -> ");
-                        }
-                        System.out.println("");
-                        System.out.println("Koszt: "+ annealing.getPathCost(solution));
+                        Genetic genetic = new Genetic(cities.getAdjacencyMatrix(),population);
+                        genetic.resolve();
+
                         break;
+                    case 5:
+                        System.out.println("Podaj kolejno temperature, chlodzenie, czas populacji, czas trwania programu");
+                        temperature = keyboard.nextInt();
+                        cooler = keyboard.nextDouble();
+                        period = keyboard.nextInt();
+                        time = keyboard.nextLong();
                     case 6:
                         //testSingleBnB(13);
 
@@ -72,7 +82,7 @@ public class TravelingSalespersonProblem {
 
             }
             System.out.println("\n\n");
-        } while (choise != 5);
+        } while (choise != 7);
     }
 
     private static void testBF(int node){
