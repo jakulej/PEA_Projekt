@@ -27,12 +27,12 @@ public class TravelingSalespersonProblem {
                 choise = keyboard.nextInt();
                 keyboard.nextLine();
                 System.out.println(choise);
-                long seconds = 160L;
+                long seconds = 60L;
                 long time = seconds * 1000000000L;
                 int temperature = 2293000;
                 double cooler = 0.9;
                 int period = 50;
-                int population = 10;
+                int population = 16;
 
 
                 switch (choise) {
@@ -53,8 +53,13 @@ public class TravelingSalespersonProblem {
                             System.out.println("Nie wczytano/wylosowano żadnych danych");
                         break;
                     case 4:
-                        Genetic genetic = new Genetic(cities.getAdjacencyMatrix(),population);
-                        genetic.resolve();
+                        Genetic genetic = new Genetic(cities.getAdjacencyMatrix(),population, time, Genetic.Mutation.Swap);
+                        int[] solution = genetic.resolve();
+                        for (int i = 0; i < solution.length; i++) {
+                            System.out.print(solution[i] + " -> ");
+                        }
+                        System.out.println(" ");
+                        System.out.println(calculateCost(solution,cities.getAdjacencyMatrix()));
 
                         break;
                     case 5:
@@ -64,13 +69,7 @@ public class TravelingSalespersonProblem {
                         period = keyboard.nextInt();
                         time = keyboard.nextLong();
                     case 6:
-                        //testSingleBnB(13);
 
-                        for (int i = 5; i < 12; i++) {
-                            testBF(i);
-                            testBnB(i);
-                        }
-                        testBnB(12);
 
                         break;
                 }
@@ -85,53 +84,13 @@ public class TravelingSalespersonProblem {
         } while (choise != 7);
     }
 
-    private static void testBF(int node){
-        Graph random;
-        long start = 0,stop,sumBF = 0;
-        for (int i = 0; i < 150; i++) {
-            random = new Graph(node);
-            if(i>49)
-                start = System.nanoTime();
-            BruteForce bruteForce = new BruteForce(random);
-            Path pathBF = bruteForce.getSolution();
-            stop = System.nanoTime();
-            if(i>49)
-                sumBF += stop - start;
+    public static int calculateCost(int[] path, int[][] graph){
+        int cost = 0;
+        for (int i = 1; i < graph.length; i++) {
+            cost += graph[path[i-1]][path[i]];
         }
-        System.out.println(node+" AvargeBF "+sumBF/100);
-    }
-    private static void testBnB(int node){
-        Graph random;
-        int correct = 100;
-        long start = 0,stop,sumBnB = 0;
-        for (int i = 0; i < 150; i++) {
-            random = new Graph(node);
-            if(i>49)
-                start = System.nanoTime();
-            BruteForce bruteForce = new BruteForce(random);
-            Path pathBF = bruteForce.getSolution();
-            stop = System.nanoTime();
-            if(pathBF==null){
-                correct--;
-                start =0;
-                stop = 0;
-            }
-            if(i>49)
-                sumBnB += stop - start;
-        }
-        System.out.println(node + " AvargeBnB: "+sumBnB/correct + " Correct: " + correct);
-    }
-    private static void testSingleBnB(int node){
-        Graph random;
-        long start = 0,stop,sumBnB = 0;
-            random = new Graph(node);
-            start = System.nanoTime();
-            BruteForce bruteForce = new BruteForce(random);
-            Path pathBF = bruteForce.getSolution();
-            stop = System.nanoTime();
-            sumBnB += stop - start;
-
-        System.out.println("Avarge: "+sumBnB);
+        cost += graph[path[path.length-1]][0];
+        return cost;
     }
 
 }

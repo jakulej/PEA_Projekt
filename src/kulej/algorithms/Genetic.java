@@ -6,20 +6,51 @@ public class Genetic {
     int[][] graph;
     int nodeCount;
     int populationSize;
+    double crossoverRatio = 0.8;
+    double mutationRatio = 0.01;
+    Mutation mutation;
+    Path bestSolution;
 
+
+    long timeLimit;
     public int[] resolve(){
-        Path path1 = new Path();
-        Path path2 = new Path();
-        path1.printPath();
-        path2.printPath();
-        Mutation mutation = Mutation.Inverse;
-        Mutation mutation2 = Mutation.Swap;
-        mutation.mutate(path1);
-        mutation2.mutate(path2);
 
-        path1.printPath();
-        path2.printPath();
-        return new int[0];
+        ArrayList<Path> population = new ArrayList<>();
+        long start = System.nanoTime();
+        bestSolution = new Path();
+        Path best = genetic(generatePopulation());
+
+        do {
+            population.add(best);
+            while (population.size()!=populationSize){
+                population.add(genetic(generatePopulation()));
+            }
+            best = genetic(population);
+            population.clear();
+        }while(System.nanoTime()-start<timeLimit);
+
+       return bestSolution.path;
+    }
+    private Path genetic(ArrayList<Path> population){
+        Path best;
+        Random random = new Random();
+        //Krzyzowanie
+        population = selection(population);
+        if(random.nextDouble()<crossoverRatio)
+            Crossover.PMX.crossover(population.get(0),population.get(1));
+
+        if(population.get(0).fitnessScore>population.get(1).fitnessScore)
+            best = population.get(0);
+        else
+            best = population.get(1);
+
+        //Mutacja
+        if(random.nextDouble()<mutationRatio)
+            mutation.mutate(best);
+
+        if(best.fitnessScore> bestSolution.fitnessScore)
+            bestSolution = new Path(best);
+        return best;
     }
     int getFitnessScore(int[] path){
         int summary = 0;
@@ -31,6 +62,14 @@ public class Genetic {
     }
     ArrayList<Path> generatePopulation(){
         ArrayList<Path> population = new ArrayList<Path>();
+        while (population.size()!=populationSize){
+            population.add(new Path());
+        }
+        return population;
+    }
+    ArrayList<Path> generatePopulation(Path path){
+        ArrayList<Path> population = new ArrayList<Path>();
+        population.add(path);
         while (population.size()!=populationSize){
             population.add(new Path());
         }
@@ -50,8 +89,10 @@ public class Genetic {
         return path;
     }
     ArrayList<Path> selection(ArrayList<Path> population){
-        for (int i = 0; i < populationSize/2; i++) {
-            population.remove(getWorsePath(population.get(i),population.get(i+1)));
+        while(population.size()>2) {
+            for (int i = 0; i < population.size() / 2; i++) {
+                population.remove(getWorsePath(population.get(i), population.get(i + 1)));
+            }
         }
         return population;
     }
@@ -70,11 +111,19 @@ public class Genetic {
             this.path = randomPath();
             fitnessScore = getFitnessScore(this.path);
         }
+        public Path(Path path){
+            this.path = new int[nodeCount];
+            System.arraycopy(path.path,0,this.path,0,nodeCount);
+            this.fitnessScore = path.fitnessScore;
+        }
         public void printPath(){
             for (int i = 0; i < path.length; i++) {
                 System.out.print(path[i] + " -> ");
             }
                 System.out.print(path[0]+"\n");
+        }
+        public void actualizeFitnessScore(){
+            this.fitnessScore = getFitnessScore(this.path);
         }
         @Override
         public boolean equals(Object o) {
@@ -136,6 +185,8 @@ public class Genetic {
                     while(map2.containsKey(path2.path[i]))
                         path2.path[i] = map2.get(path2.path[i]);
                 }
+                path1.actualizeFitnessScore();
+                path2.actualizeFitnessScore();
             }
         };
 
@@ -144,7 +195,7 @@ public class Genetic {
         }
 
     }
-    private enum Mutation{
+    public enum Mutation{
         Swap{
             @Override
             public Path mutate(Path path){
@@ -160,6 +211,7 @@ public class Genetic {
                 path.path[first] = path.path[second];
                 path.path[second] = temp;
 
+                super.mutate(path);
                 return path;
             }
         },
@@ -188,20 +240,23 @@ public class Genetic {
                     path.path[end-i-1] = temp[i];
                 }
 
+                super.mutate(path);
                 return path;
             }
         };
 
         public Path mutate(Path path){
-
+            path.actualizeFitnessScore();
             return null;
         }
     }
 
-    public Genetic(int[][] graph, int populationSize) {
+    public Genetic(int[][] graph, int populationSize, long timeLimit, Mutation mutation) {
+        this.mutation = mutation;
         this.graph = graph;
         this.nodeCount = graph.length;
         this.populationSize = populationSize;
+        this.timeLimit = timeLimit;
 
     }
 }
