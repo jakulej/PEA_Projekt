@@ -10,73 +10,47 @@ public class Genetic {
     double mutationRatio = 0.01;
     Mutation mutation;
     Path bestSolution;
+    int selectionSize = 20;
+    ArrayList<Path> population;
 
 
     long timeLimit;
     public int[] resolve(){
-        Path[] temp;
-        ArrayList<Path> population = new ArrayList<>();
+
+        population = new ArrayList<>();
+        population = generatePopulation();
         long start = System.nanoTime();
-        bestSolution = new Path();
-        temp = genetic(generatePopulation(), start);
-        Path best;
-        checkIsBest(temp[0],temp[1],start);
-
-
+        bestSolution = population.get(0);
         do {
-            population.add(temp[0]);
-            population.add(temp[1]);
-            while (population.size()!=populationSize){
-                temp = genetic(generatePopulation(),start);
-                population.add(temp[0]);
-                population.add(temp[1]);
-            }
-            temp = genetic(population,start);
-
-            checkIsBest(temp[0],temp[1],start);
-            population.clear();
-
-
+            geneticLoop(start);
         }while(System.nanoTime()-start<timeLimit);
 
        return bestSolution.path;
     }
-    private void checkIsBest(Path path1, Path path2, long start){
-        float time = (float)(System.nanoTime()-start)/(float)1000000000L;
-        if(path1.fitnessScore>bestSolution.fitnessScore) {
-            bestSolution = new Path(path1);
-            System.out.println("wynik dla " +time+"0 sek = " + calculateCost(bestSolution.path,this.graph)+ " "+ bestSolution.fitnessScore);
-        }
-        if(path2.fitnessScore>bestSolution.fitnessScore) {
-            bestSolution = new Path(path2);
-            System.out.println("wynik dla " +time+"0 sek = " + calculateCost(bestSolution.path,this.graph)+ " "+ bestSolution.fitnessScore);
-        }
-    }
-    private void  printNewBestPath(long start){
-        System.out.println("wynik dla " +(System.nanoTime()-start)/1000000000L+"0 sek = " + calculateCost(bestSolution.path,this.graph));
-    }
-    private Path[] genetic(ArrayList<Path> population, long start){
-        Path[] temp = new Path[2];
+    private void geneticLoop(long start){
         Random random = new Random();
-        //Krzyzowanie
-        population = selection(population);
-        checkIsBest(population.get(0),population.get(1),start);
+        ArrayList<Path> selected;
+        PriorityQueue<Path> populationToSelection = new PriorityQueue<Path>(Comparator.reverseOrder());
 
-        if(random.nextDouble()<crossoverRatio)
-            Crossover.PMX.crossover(population.get(0),population.get(1));
-        checkIsBest(population.get(0),population.get(1),start);
+        populationToSelection = getPopulationToSelection();
+        selected = selection(populationToSelection);
+        checkIsBest(selected.get(0),selected.get(1),start);
+
+        //Krzyzowanie
+        if(random.nextDouble()<crossoverRatio) {
+            Crossover.PMX.crossover(selected.get(0), selected.get(1));
+            checkIsBest(selected.get(0),selected.get(1),start);
+        }
 
         //Mutacja
-        if(random.nextDouble()<mutationRatio)
-            mutation.mutate(population.get(0));
-        if(random.nextDouble()<mutationRatio)
-            mutation.mutate(population.get(1));
-
-        checkIsBest(population.get(0),population.get(1),start);
-
-        temp[0] = population.get(0);
-        temp[1] = population.get(1);
-        return temp;
+        if(random.nextDouble()<mutationRatio) {
+            mutation.mutate(selected.get(0));
+            checkIsBest(selected.get(0),selected.get(1),start);
+        }
+        if(random.nextDouble()<mutationRatio){
+            mutation.mutate(selected.get(1));
+            checkIsBest(selected.get(0), selected.get(1), start);
+        }
     }
     double getFitnessScore(int[] path){
         double summary = 0;
@@ -87,19 +61,24 @@ public class Genetic {
         return 1/summary;
     }
     ArrayList<Path> generatePopulation(){
-        ArrayList<Path> population = new ArrayList<Path>();
-        while (population.size()!=populationSize){
+        while (population.size()<populationSize){
             population.add(new Path());
         }
         return population;
     }
-    ArrayList<Path> generatePopulation(Path path){
-        ArrayList<Path> population = new ArrayList<Path>();
-        population.add(path);
-        while (population.size()!=populationSize){
-            population.add(new Path());
+    private void checkIsBest(Path path1, Path path2, long start){
+        float time = (float)(System.nanoTime()-start)/(float)100000000L;
+        if(path1.fitnessScore>bestSolution.fitnessScore){
+            bestSolution = new Path(path1);
+            System.out.println("Wynik dla "+time + "0 sek = " + calculateCost(bestSolution.path, this.graph));
+        } else if (path2.fitnessScore>bestSolution.fitnessScore) {
+            bestSolution = new Path(path2);
+            System.out.println("Wynik dla "+time + "0 sek = " + calculateCost(bestSolution.path, this.graph));
+
         }
-        return population;
+    }
+    private void printNewBestPath(long start){
+
     }
     int[] randomPath(){
         ArrayList nodeLeft = new ArrayList<>();
@@ -114,45 +93,22 @@ public class Genetic {
         }
         return path;
     }
-    ArrayList<Path> selection(ArrayList<Path> population){
-        /*while(population.size()>2) {
-            for (int i = 0; i < population.size() / 2; i++) {
-                population.remove(getWorsePath(population.get(i), population.get(i + 1)));
-            }
-        }*/
-        Path bestPaths[] = new Path[2];
-        Path temp;
-        bestPaths[0] = population.get(0);
-        bestPaths[1] = population.get(1);
-        if (bestPaths[1].fitnessScore>bestPaths[0].fitnessScore) {
-            bestPaths[0] = bestPaths[1];
-            bestPaths[1] = population.get(0);
-        }
-        for (int i = 2; i < population.size(); i++) {
-            temp = population.get(i);
-            if(temp.fitnessScore>bestPaths[0].fitnessScore){
-                bestPaths[1] = bestPaths[0];
-                bestPaths[0] = temp;
-            } else if (temp.fitnessScore>bestPaths[1].fitnessScore) {
-                bestPaths[1] = temp;
-            }
+    ArrayList<Path> selection(PriorityQueue<Path> populationToSelection){
+        ArrayList<Path> selected = new ArrayList<>();
 
-        }
-        population.clear();
-        population.add(bestPaths[0]);
-        population.add(bestPaths[1]);
-        return population;
+        selected.add(populationToSelection.poll());
+        selected.add(populationToSelection.poll());
+
+        return selected;
     }
-    public static int calculateCost(int[] path, int[][] graph){
-        int cost = 0;
-        for (int i = 1; i < graph.length; i++) {
-            cost += graph[path[i-1]][path[i]];
-        }
-        cost += graph[path[path.length-1]][path[0]];
-        return cost;
+    PriorityQueue<Path> getPopulationToSelection(){
+        PriorityQueue<Path> populationToSelection = new PriorityQueue<Path>(Comparator.reverseOrder());
+        Random random = new Random();
+
+        while(populationToSelection.size()<selectionSize)
+            populationToSelection.add(population.get(random.nextInt(populationSize)));
+        return populationToSelection;
     }
-
-
     Path getWorsePath(Path path1, Path path2){
         if (path1.fitnessScore< path2.fitnessScore){
             return path1;
@@ -160,7 +116,15 @@ public class Genetic {
         else
             return path2;
     }
-    private class Path{
+    public static int calculateCost(int[] path, int[][] graph){
+        int cost = 0 ;
+        for (int i = 0; i < graph.length; i++) {
+            cost += graph[path[i-1]][path[i]];
+        }
+        cost += graph[path.length-1][path[0]];
+        return cost;
+    }
+    private class Path implements Comparable<Path>{
         int[] path;
         double fitnessScore;
 
@@ -182,17 +146,16 @@ public class Genetic {
         public void actualizeFitnessScore(){
             this.fitnessScore = getFitnessScore(this.path);
         }
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Path path1 = (Path) o;
-            return Arrays.equals(path, path1.path);
-        }
 
         @Override
-        public int hashCode() {
-            return Arrays.hashCode(path);
+        public int compareTo(Path o) {
+            if(this.fitnessScore>o.fitnessScore)
+                return 1;
+            else if (this.fitnessScore<o.fitnessScore) {
+                return -1;
+            }
+            else
+                return 0;
         }
     }
     private enum Crossover {
@@ -291,6 +254,7 @@ public class Genetic {
                 }
                 int lenght = end - begin;
                 int[] temp = new int[lenght];
+                System.out.println("begin end: " + begin + " " + end);
                 System.arraycopy(path.path,begin,temp,0, lenght);
                 for (int i = 0; i < lenght; i++) {
                     path.path[end-i-1] = temp[i];

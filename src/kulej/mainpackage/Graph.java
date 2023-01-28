@@ -2,6 +2,8 @@ package kulej.mainpackage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.Random;
 
@@ -9,10 +11,10 @@ public class Graph {
     public int getNodeCount() {
         return nodeCount;
     }
-
     int nodeCount;
     int edgeCount;
     int[][] adjacencyMatrix;
+
 
     public Graph(String filename) throws FileNotFoundException {
         Scanner read = new Scanner(new File(filename));
