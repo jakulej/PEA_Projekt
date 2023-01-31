@@ -10,7 +10,7 @@ public class Genetic {
     double mutationRatio = 0.01;
     Mutation mutation;
     Path bestSolution;
-    int selectionSize = 20;
+    int selectionSize;
     ArrayList<Path> population;
 
 
@@ -52,8 +52,8 @@ public class Genetic {
             checkIsBest(selected.get(0), selected.get(1), start);
         }
     }
-    double getFitnessScore(int[] path){
-        double summary = 0;
+    float getFitnessScore(int[] path){
+        float summary = 0;
         for (int i = 1; i < nodeCount; i++) {
             summary+= graph[path[i-1]][path[i]];
         }
@@ -67,7 +67,7 @@ public class Genetic {
         return population;
     }
     private void checkIsBest(Path path1, Path path2, long start){
-        float time = (float)(System.nanoTime()-start)/(float)100000000L;
+        float time = (float)(System.nanoTime()-start)/(float)1000000000L;
         if(path1.fitnessScore>bestSolution.fitnessScore){
             bestSolution = new Path(path1);
             System.out.println("Wynik dla "+time + "0 sek = " + calculateCost(bestSolution.path, this.graph));
@@ -118,7 +118,7 @@ public class Genetic {
     }
     public static int calculateCost(int[] path, int[][] graph){
         int cost = 0 ;
-        for (int i = 0; i < graph.length; i++) {
+        for (int i = 1; i < graph.length; i++) {
             cost += graph[path[i-1]][path[i]];
         }
         cost += graph[path.length-1][path[0]];
@@ -126,7 +126,7 @@ public class Genetic {
     }
     private class Path implements Comparable<Path>{
         int[] path;
-        double fitnessScore;
+        float fitnessScore;
 
         public Path(){
             this.path = randomPath();
@@ -254,7 +254,6 @@ public class Genetic {
                 }
                 int lenght = end - begin;
                 int[] temp = new int[lenght];
-                System.out.println("begin end: " + begin + " " + end);
                 System.arraycopy(path.path,begin,temp,0, lenght);
                 for (int i = 0; i < lenght; i++) {
                     path.path[end-i-1] = temp[i];
@@ -271,7 +270,8 @@ public class Genetic {
         }
     }
 
-    public Genetic(int[][] graph, int populationSize, long timeLimit, Mutation mutation) {
+    public Genetic(int[][] graph, int populationSize, int selectionSize, long timeLimit, Mutation mutation) {
+        this.selectionSize = selectionSize;
         this.mutation = mutation;
         this.graph = graph;
         this.nodeCount = graph.length;

@@ -27,12 +27,13 @@ public class TravelingSalespersonProblem {
                 choise = keyboard.nextInt();
                 keyboard.nextLine();
                 System.out.println(choise);
-                long seconds = 120L;
+                long seconds = 60L;
                 long time = seconds * 1000000000L;
                 int temperature = 2293000;
                 double cooler = 0.9;
                 int period = 50;
-                int population = 100;
+                int population = 1000;
+                int selectionSize = 100;
 
 
                 switch (choise) {
@@ -53,7 +54,7 @@ public class TravelingSalespersonProblem {
                             System.out.println("Nie wczytano/wylosowano żadnych danych");
                         break;
                     case 4:
-                        Genetic genetic = new Genetic(cities.getAdjacencyMatrix(),population, time, Genetic.Mutation.Inverse);
+                        Genetic genetic = new Genetic(cities.getAdjacencyMatrix(),population, selectionSize,time, Genetic.Mutation.Inverse);
                         int[] solution = genetic.resolve();
                         for (int i = 0; i < solution.length; i++) {
                             System.out.print(solution[i] + " -> ");
